@@ -1,4 +1,4 @@
-using Core.Dtos;
+
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Data;
@@ -10,14 +10,14 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController(IProductRepository repo) : ControllerBase
+    public class ProductController(IGenericRepository<Product> repo)  : ControllerBase
     {
 
 
         [HttpGet]
         public async Task<ActionResult> GetAllAsync()
         {
-            var products = await repo.GetAllProducts();
+            var products = await repo.GetAllAsync();
             return Ok(products);
         }
         [HttpGet("{id}")]
@@ -27,13 +27,13 @@ namespace API.Controllers
             {
                 return NotFound("product not found");
             }
-            var product = await repo.GetProductById(id);
+            var product = await repo.GetById(id);
             return Ok(product);
         }
         [HttpPost]
         public async Task<ActionResult> AddAsync(Product product)
         {
-            repo.AddProduct(product);
+            repo.Add(product);
             if (await repo.SaveChangesAsync())
             {
                 return Ok("New Product Added");
@@ -51,7 +51,7 @@ namespace API.Controllers
             {
                 return NoContent();
             }
-            repo.UpdateProduct(product);
+            repo.Update(product);
             return Ok("product updated");
         }
         [HttpDelete]
@@ -61,8 +61,8 @@ namespace API.Controllers
             {
                 return NotFound("product not exist");
             }
-            var product = await repo.GetProductById(id);
-            repo.DeleteProduct(product);
+            var product = await repo.GetById(id);
+            repo.Delete(product!);
             if (await repo.SaveChangesAsync())
                 return Ok("product deleted");
             return BadRequest("Failed to delete product");
@@ -70,7 +70,7 @@ namespace API.Controllers
 
         private bool ProductExist(int id)
         {
-            return repo.ProductExists(id);
+            return repo.IsExist(id);
         }
     }
 }
